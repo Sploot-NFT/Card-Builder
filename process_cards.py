@@ -12,7 +12,7 @@ import json
 metadata_directory = "../sploot-generator/metadata"
 card_template_directory = "templates"
 card_output_directory = "cards"
-
+dna_focus_colors = ["#FE2712", "#0247FE", "#FEFE33"]
 overlayAnchor = (200, 100)
 
 headerStyle = ImageFont.truetype(
@@ -87,6 +87,7 @@ def merge_metadata(metadata, index):
     draw_target = draw_stats(draw_target, metadata["attributes"], width)
 
     # handle the dna band.
+    draw_target = draw_dna_band(draw_target, metadata["dna"], width)
 
     background.save(card_output_filename)
 
@@ -234,6 +235,17 @@ def draw_stats(draw_target, attributes, image_width):
     y = 420 + overlayAnchor[1]
     draw_target.text((x, y), str(round(overall/9, 1)),
                      (255, 255, 255), font=ovrStyle)
+
+    return draw_target
+
+
+def draw_dna_band(draw_target, dna, image_width):
+
+    # for dna_data in attributes:
+
+    w, h = round(image_width/15), 10
+    shape = [(105, 490), (w, h)]
+    # draw_target.rectangle(shape, fill="#800080")
 
     return draw_target
 
