@@ -16,11 +16,15 @@ card_output_directory = "cards"
 overlayAnchor = (200, 100)
 
 headerStyle = ImageFont.truetype(
-    card_template_directory + "/theboldfont.ttf", 76)
+    card_template_directory + "/Inter-Bold.ttf", 64)
 statStyle = ImageFont.truetype(
-    card_template_directory + "/theboldfont.ttf", 16)
+    card_template_directory + "/Inter-Bold.ttf", 18)
 traitStyle = ImageFont.truetype(
-    card_template_directory + "/theboldfont.ttf", 16)
+    card_template_directory + "/Inter-Regular.ttf", 16)
+labelStyle = ImageFont.truetype(
+    card_template_directory + "/LeagueGothic-Regular.otf", 32)
+ovrStyle = ImageFont.truetype(
+    card_template_directory + "/LeagueGothic-Regular.otf", 64)
 
 
 def create_cards():
@@ -56,11 +60,33 @@ def merge_metadata(metadata, index):
     draw_target = ImageDraw.Draw(background)
     draw_target = draw_name(draw_target, metadata["name"], width)
 
+    # handle the text.
     for attribute_data in metadata["attributes"]:
 
         if attribute_data["trait_type"] == "Personality":
             draw_target = draw_personality(
                 draw_target, attribute_data["value"], width)
+
+        if attribute_data["trait_type"] == "Vice":
+            draw_target = draw_vice(
+                draw_target, attribute_data["value"], width)
+
+        if attribute_data["trait_type"] == "Phobia":
+            draw_target = draw_phobia(
+                draw_target, attribute_data["value"], width)
+
+        if attribute_data["trait_type"] == "Role":
+            draw_target = draw_role(
+                draw_target, attribute_data["value"], width)
+
+        if attribute_data["trait_type"] == "Class":
+            draw_target = draw_class(
+                draw_target, attribute_data["value"], width)
+
+    # handle the stats.
+    draw_target = draw_stats(draw_target, metadata["attributes"], width)
+
+    # handle the dna band.
 
     background.save(card_output_filename)
 
@@ -71,20 +97,20 @@ def merge_metadata(metadata, index):
 def draw_name(draw_target, name, image_width):
 
     # first name
-    first_name = name.split()[0]
+    first_name = name.split()[0].upper()
     textwidth, textheight = draw_target.textsize(
         first_name, font=headerStyle)
     x = image_width / 2 - textwidth / 2
-    y = 185 + overlayAnchor[1]
+    y = 170 + overlayAnchor[1]
     draw_target.text((x, y), first_name,
                      (255, 255, 255), font=headerStyle)
 
     # last name
-    last_name = name.split()[1]  # NOTE:  this won't work with 3-word names.
+    last_name = name.upper().replace(first_name, "", 1)
     textwidth, textheight = draw_target.textsize(
         last_name, font=headerStyle)
     x = image_width / 2 - textwidth / 2
-    y = 255 + overlayAnchor[1]
+    y = 235 + overlayAnchor[1]
     draw_target.text((x, y), last_name,
                      (255, 255, 255), font=headerStyle)
 
@@ -93,7 +119,7 @@ def draw_name(draw_target, name, image_width):
 
 def draw_personality(draw_target, personality, image_width):
 
-    draw_string = "Personality: " + personality
+    draw_string = "PERSONALITY: " + personality
 
     textwidth, textheight = draw_target.textsize(
         draw_string, font=traitStyle)
@@ -103,6 +129,111 @@ def draw_personality(draw_target, personality, image_width):
 
     draw_target.text((x, y), draw_string,
                      (255, 255, 255), font=traitStyle)
+
+    return draw_target
+
+
+def draw_vice(draw_target, vice, image_width):
+
+    draw_string = "VICE: " + vice
+
+    textwidth, textheight = draw_target.textsize(
+        draw_string, font=traitStyle)
+
+    x = image_width / 2 - textwidth / 2
+    y = 355 + overlayAnchor[1]
+
+    draw_target.text((x, y), draw_string,
+                     (255, 255, 255), font=traitStyle)
+
+    return draw_target
+
+
+def draw_phobia(draw_target, phobia, image_width):
+
+    draw_string = "PHOBIA: " + phobia
+
+    textwidth, textheight = draw_target.textsize(
+        draw_string, font=traitStyle)
+
+    x = image_width / 2 - textwidth / 2
+    y = 380 + overlayAnchor[1]
+
+    draw_target.text((x, y), draw_string,
+                     (255, 255, 255), font=traitStyle)
+
+    return draw_target
+
+
+def draw_class(draw_target, player_class, image_width):
+
+    draw_string = player_class.upper()
+    textwidth, textheight = draw_target.textsize(
+        draw_string, font=labelStyle)
+
+    x = image_width / 2 - textwidth / 2
+    y = 65 + overlayAnchor[1]
+
+    draw_target.text((x, y), draw_string,
+                     (255, 255, 255), font=labelStyle)
+
+    return draw_target
+
+
+def draw_role(draw_target, role, image_width):
+
+    draw_string = role.upper()
+
+    textwidth, textheight = draw_target.textsize(
+        draw_string, font=traitStyle)
+
+    x = image_width / 2 - textwidth / 2
+    y = 100 + overlayAnchor[1]
+
+    draw_target.text((x, y), draw_string,
+                     (255, 255, 255), font=traitStyle)
+
+    return draw_target
+
+
+def draw_stats(draw_target, attributes, image_width):
+
+    stat_count = 0
+    col_count = 0
+    col_gap = 165
+    row_gap = 36
+    overall = 0.0
+    running_total = 0.0
+
+    for attribute_data in attributes:
+        if isinstance(attribute_data["value"], str) == False:
+
+            running_total = running_total + attribute_data["value"]
+            overall = overall + attribute_data["value"]
+
+            x = overlayAnchor[0] + (col_count * col_gap) + 210
+            y = overlayAnchor[1] + (stat_count % 3 * row_gap) + 600
+            draw_target.text((x, y), str(attribute_data["value"]),
+                             (255, 255, 255), font=statStyle)
+
+            stat_count = stat_count + 1
+
+            if stat_count % 3 == 0:
+                # draw col average.
+                x = overlayAnchor[0] + \
+                    (col_count * col_gap) + 203
+                y = overlayAnchor[1] + (3 * row_gap) + 600
+                draw_target.text((x, y), str(round(running_total/3, 1)),
+                                 (196, 196, 196), font=statStyle)
+
+                running_total = 0.0
+                col_count = col_count + 1
+
+    # overall
+    x = 105 + overlayAnchor[0]
+    y = 420 + overlayAnchor[1]
+    draw_target.text((x, y), str(round(overall/9, 1)),
+                     (255, 255, 255), font=ovrStyle)
 
     return draw_target
 
