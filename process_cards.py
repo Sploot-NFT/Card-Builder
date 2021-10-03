@@ -72,7 +72,6 @@ def create_interesting_cards():
 
     for filename in os.listdir(metadata_directory):
         if filename.endswith('.json'):
-            print("opening metadata: " + metadata_directory + "/" + filename)
 
             with open(os.path.join(metadata_directory, filename)) as file:
                 jsonString = file.read()
@@ -87,23 +86,32 @@ def create_interesting_cards():
                         is_harsh = False
 
                     if unique_count < max_cards and dna_data['code'] >= 100:
+                        print("found unique: " +
+                              metadata_directory + "/" + filename)
                         do_render = True
                         unique_count = unique_count + 1
 
                     elif rare_count < max_cards and dna_data['code'] >= 10:
+                        print("found rare: " +
+                              metadata_directory + "/" + filename)
                         do_render = True
                         rare_count = rare_count + 1
 
                 if is_harsh:
+                    print("found harsh: " + metadata_directory + "/" + filename)
                     harsh_count = harsh_count + 1
 
                 for attribute_data in card_data["attributes"]:
                     if management_count < max_cards and attribute_data["trait_type"] == "Role" and attribute_data["value"] == "Management":
+                        print("found management: " +
+                              metadata_directory + "/" + filename)
                         do_render = True
                         management_count = management_count + 1
 
                 for weird_name in weird_names:
                     if weird_count < max_cards and weird_name in card_data["name"]:
+                        print("found weird: " +
+                              metadata_directory + "/" + filename)
                         do_render = True
                         weird_count = weird_count + 1
 
