@@ -13,7 +13,11 @@ metadata_directory = "../sploot-generator/metadata"
 card_template_directory = "templates"
 card_output_directory = "cards"
 dna_focus_colors = ["#FE2712", "#0247FE", "#FEFE33"]
+weird_names = ["Aristotle", "Armpit", "Backsplash", "Bastardly", "Beaverclown", "Beef", "Berry", "Biggums", "Blade", "Bloviate", "Brick", "Candy", "Cemetary", "Chief", "Chilly", "Chipper", "Cilantro", "Cleopatra", "Collywobbles", "Colon", "Constantinople", "Conundrum", "Corncake", "Cowardly", "Crabwalk", "Crayola", "Creepy", "Cruel", "Dewlap", "Disco", "Dumfoozle", "Featherskin", "Fingers", "Fishery", "Flinch", "Fury", "Gardyloo", "Glasshouse", "Handsome", "Helvetica", "Hero ", "Hideous", "Kitten", "Lasagna", "Le Stonks", "Legend", "Leghair", "Love", "Lowshelfspace", "Magic", "Markcosmisplats",
+               "Market", "Marmaduke", "Marmalade", "Mercutio", "Moon", "Moreplease", "Mountainous", "Newcarsmell", "Nincompoop", "Noddy", "O'Yacklebrunt", "Oldmanbutt", "Outstanding", "Oysterbury", "Periscope", "Philtrum", "Pigpen", "Piles", "Pooney", "Prunella", "Rastafloods", "Ribeye", "Scrawnie", "Shivers", "Shrimpgun", "Sialoquent", "Silverback", "Sir", "Skyscraper", "Snuggles", "So-sure", "Sod", "Spike", "Stumble", "Sweet Tea", "Teeth", "Tidy", "Tiger", "Tweetly", "Van Clamberwobble", "Van Winkle", "Vanilla", "Wabbit", "Whatnot", "Widdershins", "Wigglebottom", "Woodstaff", "Zeus", "Zoro"]
 overlayAnchor = (200, 100)
+
+max_cards = 5
 
 headerStyle = ImageFont.truetype(
     card_template_directory + "/Inter-Bold.ttf", 64)
@@ -32,6 +36,8 @@ def create_cards():
 
     print("============ PROCESSING CARDS ============")
 
+    card_counter = 0
+
     for filename in os.listdir(metadata_directory):
         if filename.endswith('.json'):
             print("opening metadata: " + metadata_directory + "/" + filename)
@@ -39,7 +45,70 @@ def create_cards():
             with open(os.path.join(metadata_directory, filename)) as file:
                 jsonString = file.read()
                 index = filename.split(".")[0]
-                merge_metadata(json.loads(jsonString), index)
+                card_data = json.loads(jsonString)
+                merge_metadata(card_data, index)
+
+        card_counter = card_counter + 1
+
+        if card_counter > max_cards:
+            break
+
+    print("")
+    print("===> Finished.")
+    print("")
+    main_menu()
+
+
+def create_interesting_cards():
+    # global metadata_directory
+
+    print("============ PROCESSING INTERSTING CARDS ============")
+
+    unique_count = 0
+    rare_count = 0
+    weird_count = 0
+    harsh_count = 0
+    management_count = 0
+
+    for filename in os.listdir(metadata_directory):
+        if filename.endswith('.json'):
+            print("opening metadata: " + metadata_directory + "/" + filename)
+
+            with open(os.path.join(metadata_directory, filename)) as file:
+                jsonString = file.read()
+                index = filename.split(".")[0]
+                card_data = json.loads(jsonString)
+
+                is_harsh = True
+                do_render = False
+
+                for dna_data in card_data["dna"]:
+                    if harsh_count < max_cards and dna_data['code'] >= 1:
+                        is_harsh = False
+
+                    if unique_count < max_cards and dna_data['code'] >= 100:
+                        do_render = True
+                        unique_count = unique_count + 1
+
+                    elif rare_count < max_cards and dna_data['code'] >= 10:
+                        do_render = True
+                        rare_count = rare_count + 1
+
+                if is_harsh:
+                    harsh_count = harsh_count + 1
+
+                for attribute_data in card_data["attributes"]:
+                    if management_count < max_cards and attribute_data["trait_type"] == "Role" and attribute_data["value"] == "Management":
+                        do_render = True
+                        management_count = management_count + 1
+
+                for weird_name in weird_names:
+                    if weird_count < max_cards and weird_name in card_data["name"]:
+                        do_render = True
+                        weird_count = weird_count + 1
+
+                if do_render:
+                    merge_metadata(card_data, index)
 
     print("")
     print("===> Finished.")
@@ -98,7 +167,7 @@ def merge_metadata(metadata, index):
 def draw_name(draw_target, name, image_width):
 
     # first name
-    first_name = name.split()[0].upper()
+    first_name = name.split()[0].upper().strip()
     textwidth, textheight = draw_target.textsize(
         first_name, font=headerStyle)
     x = image_width / 2 - textwidth / 2
@@ -107,7 +176,7 @@ def draw_name(draw_target, name, image_width):
                      (255, 255, 255), font=headerStyle)
 
     # last name
-    last_name = name.upper().replace(first_name, "", 1)
+    last_name = name.upper().replace(first_name, "", 1).strip()
     textwidth, textheight = draw_target.textsize(
         last_name, font=headerStyle)
     x = image_width / 2 - textwidth / 2
@@ -241,11 +310,28 @@ def draw_stats(draw_target, attributes, image_width):
 
 def draw_dna_band(draw_target, dna, image_width):
 
-    # for dna_data in attributes:
+    segment_width = 50
+    segment_height = 3
+    x_anchor = image_width / 2 - segment_width * 4.5
+    y_anchor = 510 + overlayAnchor[1]
+    dna_counter = 0
 
-    w, h = round(image_width/15), 10
-    shape = [(105, 490), (w, h)]
-    # draw_target.rectangle(shape, fill="#800080")
+    # draw the gray base.
+    shape = [(x_anchor, y_anchor), (x_anchor +
+                                    (segment_width*9), y_anchor+segment_height)]
+    draw_target.rectangle(shape, fill="#696969")
+
+    # fill in the colors.
+    for dna_data in dna:
+        x = x_anchor + (dna_counter * segment_width)
+        segment_top_left = (x, y_anchor)
+        segment_bottom_right = (
+            x + (segment_width*dna_data["scale"]), y_anchor+segment_height)
+
+        shape = [segment_top_left, segment_bottom_right]
+        draw_target.rectangle(shape, fill=dna_data['color'])
+
+        dna_counter = dna_counter + 1
 
     return draw_target
 
@@ -266,6 +352,7 @@ def main_menu():
     print("")
     print("========= MAIN MENU ===========")
     print("a) Create All Cards")
+    print("i) Create Interesting Cards")
     print("-------------------")
     print("q) Quit")
     print("")
@@ -274,6 +361,9 @@ def main_menu():
 
     if menuSelection.lower() == "a":
         create_cards()
+
+    if menuSelection.lower() == "i":
+        create_interesting_cards()
 
     elif menuSelection.lower() == "q":
         print("Quitting.")
