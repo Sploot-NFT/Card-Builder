@@ -15,6 +15,8 @@ card_output_directory = "cards"
 dna_focus_colors = ["#FE2712", "#0247FE", "#FEFE33"]
 weird_names = ["Aristotle", "Armpit", "Backsplash", "Bastardly", "Beaverclown", "Beef", "Berry", "Biggums", "Blade", "Bloviate", "Brick", "Candy", "Cemetary", "Chief", "Chilly", "Chipper", "Cilantro", "Cleopatra", "Collywobbles", "Colon", "Constantinople", "Conundrum", "Corncake", "Cowardly", "Crabwalk", "Crayola", "Creepy", "Cruel", "Dewlap", "Disco", "Dumfoozle", "Featherskin", "Fingers", "Fishery", "Flinch", "Fury", "Gardyloo", "Glasshouse", "Handsome", "Helvetica", "Hero ", "Hideous", "Kitten", "Lasagna", "Le Stonks", "Legend", "Leghair", "Love", "Lowshelfspace", "Magic", "Markcosmisplats",
                "Market", "Marmaduke", "Marmalade", "Mercutio", "Moon", "Moreplease", "Mountainous", "Newcarsmell", "Nincompoop", "Noddy", "O'Yacklebrunt", "Oldmanbutt", "Outstanding", "Oysterbury", "Periscope", "Philtrum", "Pigpen", "Piles", "Pooney", "Prunella", "Rastafloods", "Ribeye", "Scrawnie", "Shivers", "Shrimpgun", "Sialoquent", "Silverback", "Sir", "Skyscraper", "Snuggles", "So-sure", "Sod", "Spike", "Stumble", "Sweet Tea", "Teeth", "Tidy", "Tiger", "Tweetly", "Van Clamberwobble", "Van Winkle", "Vanilla", "Wabbit", "Whatnot", "Widdershins", "Wigglebottom", "Woodstaff", "Zeus", "Zoro"]
+unique_names = ["Will Barrow", "Neil Down", "Danny Dan-Dandy", "Flick Balls", "Anil Probes", "Bon Jontovi", "Shania Grain", "Bunny Bundtcake", "Inspector Ratchet", "Paula Logan", "Indigo Foreverago", "Crackle Poppins", "Mary Kate", "Babe Truth", "Sue Ndamukong", "Wally World",
+                "Rustie Wingnut", "Crescent Moon", "Lily Liliac", "Constance Sufferman", "Vincent Van No", "Cobbed Corn", "Hugh Jackedman", "Ty Slob", "Kat Inmouse", "Kid Rockins", "Entire Pizza", "Glorious Esteban", "Leroy Jenkins", "Gray Matter", "Anita Hit", "Miranda Wright", "Goodwill Hunting"]
 overlayAnchor = (200, 100)
 
 max_cards = 5
@@ -114,6 +116,13 @@ def create_interesting_cards():
                               metadata_directory + "/" + filename)
                         do_render = True
                         weird_count = weird_count + 1
+
+                for unique_name in unique_names:
+                    if unique_count < max_cards and unique_name in card_data["name"]:
+                        print("found unique: " +
+                              metadata_directory + "/" + filename)
+                        do_render = True
+                        unique_count = unique_count + 1
 
                 if do_render:
                     merge_metadata(card_data, index)
