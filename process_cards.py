@@ -58,7 +58,6 @@ def create_cards():
     print("")
     print("===> Finished.")
     print("")
-    main_menu()
 
 
 def create_interesting_cards():
@@ -130,7 +129,88 @@ def create_interesting_cards():
     print("")
     print("===> Finished.")
     print("")
-    main_menu()
+
+
+def print_stats():
+
+    print("============ PROCESSING CARD STATS ============")
+
+    unique_count = 0
+    rare_count = 0
+    weird_count = 0
+    harsh_count = 0
+    management_count = 0
+
+    traits = {}
+
+    for filename in os.listdir(metadata_directory):
+        if filename.endswith('.json'):
+
+            with open(os.path.join(metadata_directory, filename)) as file:
+                jsonString = file.read()
+                index = filename.split(".")[0]
+                card_data = json.loads(jsonString)
+
+                for attribute_data in card_data["attributes"]:
+                    if attribute_data['trait_type'] not in traits:
+                        traits[attribute_data['trait_type']] = {}
+
+                    if "_" + str(attribute_data['value']) not in traits[attribute_data['trait_type']]:
+                        traits[attribute_data['trait_type']
+                               ]["_" + str(attribute_data['value'])] = 0
+
+                    traits[attribute_data['trait_type']]["_" + str(attribute_data['value'])
+                                                         ] = traits[attribute_data['trait_type']]["_" + str(attribute_data['value'])] + 1
+
+                is_harsh = True
+
+                for dna_data in card_data["dna"]:
+                    if dna_data['code'] >= 100:
+                        is_harsh = False
+                        unique_count = unique_count + 1
+                        break
+
+                    elif dna_data['code'] >= 10:
+                        is_harsh = False
+                        rare_count = rare_count + 1
+                        break
+
+                    if dna_data['code'] >= 1:
+                        is_harsh = False
+
+                if is_harsh:
+                    harsh_count = harsh_count + 1
+
+                for attribute_data in card_data["attributes"]:
+                    if attribute_data["trait_type"] == "Role" and attribute_data["value"] == "Management":
+                        management_count = management_count + 1
+
+                for weird_name in weird_names:
+                    if weird_name in card_data["name"]:
+                        weird_count = weird_count + 1
+
+                for unique_name in unique_names:
+                    if unique_name in card_data["name"]:
+                        unique_count = unique_count + 1
+
+    print("___________CHARACTER_DISTRIBUTION____________")
+    print("Unique: " + str(unique_count))
+    print("Rares: " + str(rare_count))
+    print("Weird: " + str(weird_count))
+    print("Management: " + str(management_count))
+    print("Unlucky: " + str(harsh_count))
+    print("")
+
+    print("___________ATTRIBUTE_DISTRIBUTION____________")
+    for trait_name in traits.keys():
+        print("")
+        print(trait_name + ":")
+        print(json.dumps(
+            dict(sorted(traits[trait_name].items(), key=lambda item: item[1])), indent=4))
+
+    print("")
+    print("===> Finished.")
+    print("")
 
 
 def merge_metadata(metadata, index):
@@ -370,20 +450,27 @@ def main_menu():
     print("========= MAIN MENU ===========")
     print("a) Create All Cards")
     print("i) Create Interesting Cards")
+    print("p) Print Stats")
     print("-------------------")
-    print("q) Quit")
+    print("x) Exit")
     print("")
 
     menuSelection = getUserData("Which selection? (a)")
 
     if menuSelection.lower() == "a":
         create_cards()
+        main_menu()
 
     if menuSelection.lower() == "i":
         create_interesting_cards()
+        main_menu()
 
-    elif menuSelection.lower() == "q":
-        print("Quitting.")
+    elif menuSelection.lower() == "p":
+        print_stats()
+        # main_menu()
+
+    elif menuSelection.lower() == "x":
+        print("Exiting.")
         exit()
 
     else:
