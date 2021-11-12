@@ -7,6 +7,7 @@ import os
 from sys import version_info
 from PIL import Image, ImageDraw, ImageFont
 import json
+import csv
 
 
 metadata_directory = "../sploot-generator/metadata"
@@ -131,6 +132,48 @@ def create_interesting_cards():
     print("")
 
 
+def export_spreadsheet():
+
+    with open('sploot_characters.csv', mode='a') as sploot_characters:
+        character_writer = csv.writer(
+            sploot_characters, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+        character_writer.writerow(['Name', 'Speed', 'Stamina', 'Strength', 'Aggression', 'Creativity', 'Luck',
+                                   'Focus', 'Influence', 'Agility', 'Phobia', 'Vice', 'Role', 'Personality', 'Class', 'Affinity'])
+
+        for filename in os.listdir(metadata_directory):
+            if filename.endswith('.json'):
+
+                with open(os.path.join(metadata_directory, filename)) as file:
+                    jsonString = file.read()
+                    index = filename.split(".")[0]
+                    card_data = json.loads(jsonString)
+
+                character_row = []
+                character_row.append(card_data["name"])
+                character_row.append(get_attribute(card_data, "Speed"))
+                character_row.append(get_attribute(card_data, "Stamina"))
+                character_row.append(get_attribute(card_data, "Strength"))
+                character_row.append(get_attribute(card_data, "Aggression"))
+                character_row.append(get_attribute(card_data, "Creativity"))
+                character_row.append(get_attribute(card_data, "Luck"))
+                character_row.append(get_attribute(card_data, "Focus"))
+                character_row.append(get_attribute(card_data, "Influence"))
+                character_row.append(get_attribute(card_data, "Agility"))
+                character_row.append(get_attribute(card_data, "Phobia"))
+                character_row.append(get_attribute(card_data, "Vice"))
+                character_row.append(get_attribute(card_data, "Role"))
+                character_row.append(get_attribute(card_data, "Personality"))
+                character_row.append(get_attribute(card_data, "Class"))
+                character_row.append(get_attribute(card_data, "Affinity"))
+
+                character_writer.writerow(character_row)
+
+    print("")
+    print("===> Finished.")
+    print("")
+
+
 def print_stats():
 
     print("============ PROCESSING CARD STATS ============")
@@ -211,6 +254,13 @@ def print_stats():
     print("")
     print("===> Finished.")
     print("")
+
+
+def get_attribute(metadata, attr):
+    for attribute_data in metadata["attributes"]:
+        if attribute_data["trait_type"] == attr:
+            return attribute_data["value"]
+    return ""
 
 
 def merge_metadata(metadata, index):
@@ -451,6 +501,7 @@ def main_menu():
     print("a) Create All Cards")
     print("i) Create Interesting Cards")
     print("p) Print Stats")
+    print("s) Character Spreadsheet")
     print("-------------------")
     print("x) Exit")
     print("")
@@ -467,6 +518,10 @@ def main_menu():
 
     elif menuSelection.lower() == "p":
         print_stats()
+        # main_menu()
+
+    elif menuSelection.lower() == "s":
+        export_spreadsheet()
         # main_menu()
 
     elif menuSelection.lower() == "x":
